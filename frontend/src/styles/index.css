@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    direction: rtl;
+  }
+
+  body {
+    @apply bg-slate-50 text-ink-900 font-sans antialiased;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Numbers stay LTR even inside RTL text */
+  .ltr-nums {
+    direction: ltr;
+    unicode-bidi: embed;
+    display: inline-block;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-card;
+  }
+
+  .input-base {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm
+           text-ink-900 placeholder:text-ink-400 outline-none transition
+           focus:border-primary-500 focus:ring-2 focus:ring-primary-100;
+  }
+
+  .table-row-hover {
+    @apply transition-colors hover:bg-slate-50;
+  }
+}
+
+/* Thin custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

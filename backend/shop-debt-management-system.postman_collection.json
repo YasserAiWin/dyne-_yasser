@@ -1,0 +1,792 @@
+{
+	"info": {
+		"_postman_id": "893c5eb2-2df7-4638-b7eb-125be764835a",
+		"name": "Shop Debt Management System Backend API",
+		"description": "API collection for the Shop Debt Management System (SDMS) Backend. Features multi-tenant isolation, subscription and suspension gates, customer soft-deletes, and positive transaction validation.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"+22222103344\",\n    \"password\": \"Shop123456\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Logs in a user (Super Admin or Shop Owner) and returns a JWT token. Rejects expired or suspended shop owners with 403."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Profile (Me)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Returns current logged in user details."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Super Admin",
+			"item": [
+				{
+					"name": "List All Shops",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Retrieves all shops with dynamic subscription statuses."
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Shop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shopName\": \"بقالة المدينة\",\n    \"ownerName\": \"المختار ولد سيديا\",\n    \"phone\": \"+22236551122\",\n    \"password\": \"Shop123456\",\n    \"startDate\": \"2026-06-15T00:00:00.000Z\",\n    \"subscriptionDuration\": \"1_month\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops"
+							]
+						},
+						"description": "Creates a shop, shop owner user, and default whatsapp settings in a single database transaction."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Shop By ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e1b6b3ed-31f1-4272-8f43-edf9f44126e5"
+								}
+							]
+						},
+						"description": "Retrieves specific shop details including dynamic status."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Shop Info",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shopName\": \"Super Mart updated\",\n    \"ownerName\": \"John Mart updated\",\n    \"phone\": \"000-000-0000\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e1b6b3ed-31f1-4272-8f43-edf9f44126e5"
+								}
+							]
+						},
+						"description": "Updates details of a shop."
+					},
+					"response": []
+				},
+				{
+					"name": "Suspend Shop",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops/:id/suspend",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops",
+								":id",
+								"suspend"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e1b6b3ed-31f1-4272-8f43-edf9f44126e5"
+								}
+							]
+						},
+						"description": "Suspends a shop, blocking the owner from making requests."
+					},
+					"response": []
+				},
+				{
+					"name": "Activate Shop",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops/:id/activate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops",
+								":id",
+								"activate"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e1b6b3ed-31f1-4272-8f43-edf9f44126e5"
+								}
+							]
+						},
+						"description": "Activates a suspended shop."
+					},
+					"response": []
+				},
+				{
+					"name": "Extend Subscription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"addMonths\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops/:id/extend-subscription",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops",
+								":id",
+								"extend-subscription"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "e1b6b3ed-31f1-4272-8f43-edf9f44126e5"
+								}
+							]
+						},
+						"description": "Extends subscription of a shop. Accepts addDays, addMonths, addYears, or customExpiryDate."
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"dashboard"
+							]
+						},
+						"description": "Returns counts of shops segmented by dynamic status."
+					},
+					"response": []
+				},
+				{
+					"name": "Shops Expiring Soon",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops-expiring",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops-expiring"
+							]
+						},
+						"description": "Lists shops whose remaining days <= 5."
+					},
+					"response": []
+				},
+				{
+					"name": "Expired Shops",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/shops-expired",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"shops-expired"
+							]
+						},
+						"description": "Lists shops whose subscription is expired."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shop Owner",
+			"item": [
+				{
+					"name": "Shop Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"dashboard"
+							]
+						},
+						"description": "Retrieves Shop Owner dashboard stats (outstanding debt, customer categorization, remaining days, subscription status)."
+					},
+					"response": []
+				},
+				{
+					"name": "List Customers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers"
+							]
+						},
+						"description": "List all active customers (excluding soft-deleted) for the logged-in shop, with their current running balance."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Marcus Aurelius\",\n    \"phone\": \"444-333-2222\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers"
+							]
+						},
+						"description": "Adds a customer under the authenticated shop."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Retrieves profile details of a customer, verified to belong to the authenticated shop."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Customer Info",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Marcus Aurelius Antoninus\",\n    \"phone\": \"444-333-0000\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Updates customer info."
+					},
+					"response": []
+				},
+				{
+					"name": "Soft Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Soft-deletes a customer by setting deletedAt."
+					},
+					"response": []
+				},
+				{
+					"name": "List Customer Transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:customerId/transactions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":customerId",
+								"transactions"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Lists transactions for a customer, verifying the customer belongs to the authenticated shop."
+					},
+					"response": []
+				},
+				{
+					"name": "Record Customer Debt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 150.00,\n    \"note\": \"Purchase of store items\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:customerId/debts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":customerId",
+								"debts"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Adds a DEBT transaction. Rejects non-positive amounts."
+					},
+					"response": []
+				},
+				{
+					"name": "Record Customer Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 50.00,\n    \"note\": \"Partial cash payment\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shop/customers/:customerId/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"customers",
+								":customerId",
+								"payments"
+							],
+							"variable": [
+								{
+									"key": "customerId",
+									"value": "8ac1bdde-5a04-48d7-9bcc-2e7bde5d5082"
+								}
+							]
+						},
+						"description": "Adds a PAYMENT transaction. Rejects non-positive amounts."
+					},
+					"response": []
+				},
+				{
+					"name": "Get WhatsApp Settings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/shop/whatsapp/settings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"whatsapp",
+								"settings"
+							]
+						},
+						"description": "Gets WhatsApp settings for the shop owner."
+					},
+					"response": []
+				},
+				{
+					"name": "Update WhatsApp Settings",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"provider\": \"EVOLUTION\",\n    \"instanceId\": \"inst-999332\",\n    \"instanceToken\": \"tok-evolution-abcde\",\n    \"connectionStatus\": \"CONNECTED\",\n    \"webhookUrl\": \"https://mywebhook.com/whatsapp\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/shop/whatsapp/settings",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"shop",
+								"whatsapp",
+								"settings"
+							]
+						},
+						"description": "Updates WhatsApp settings configuration."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "PLACE_JWT_TOKEN_HERE",
+			"type": "string"
+		}
+	]
+}
