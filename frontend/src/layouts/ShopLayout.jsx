@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import { Outlet, useNavigate, useLocation, matchPath } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import ShopTabs from '../components/shop/ShopTabs'
 import { logout, getCurrentUser } from '../services/authService'
 import { IconDashboard, IconUsers } from '../components/icons'
 
@@ -18,7 +18,6 @@ const titles = {
 }
 
 export default function ShopLayout() {
-  const [open, setOpen] = useState(false)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const user = getCurrentUser()
@@ -29,6 +28,10 @@ export default function ShopLayout() {
     subtitle = 'تفاصيل الحساب والمعاملات'
   }
 
+  // Mobile shows the top tabs only on the two main shop pages.
+  const showMobileTabs =
+    pathname === '/shop/customers' || pathname === '/shop/dashboard'
+
   function handleLogout() {
     logout()
     navigate('/login')
@@ -36,22 +39,33 @@ export default function ShopLayout() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar
-        items={navItems}
-        title="متجري"
-        subtitle="لوحة صاحب المتجر"
-        open={open}
-        onClose={() => setOpen(false)}
-        onLogout={handleLogout}
-      />
+      {/* Sidebar: desktop only — no drawer/hamburger on mobile. */}
+      <div className="hidden lg:flex">
+        <Sidebar
+          items={navItems}
+          title="متجري"
+          subtitle="لوحة صاحب المتجر"
+          open={false}
+          onClose={() => {}}
+          onLogout={handleLogout}
+        />
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* No onMenu => Header renders no hamburger on the shop pages. */}
         <Header
           title={title}
           subtitle={subtitle}
-          onMenu={() => setOpen(true)}
           userName={user?.name || 'صاحب المتجر'}
         />
+
+        {/* Mobile top tab bar (replaces the drawer navigation). */}
+        {showMobileTabs && (
+          <div className="border-b border-slate-100 bg-white px-4 pt-2 lg:hidden">
+            <ShopTabs />
+          </div>
+        )}
+
         <main className="flex-1 p-4 md:p-6">
           <Outlet />
         </main>

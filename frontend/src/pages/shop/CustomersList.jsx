@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, NavLink } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
@@ -73,32 +73,6 @@ export default function CustomersList() {
 
   return (
     <div className="space-y-5">
-      {/* Two-tab switch: العملاء (active) / لوحة التحكم */}
-      <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
-        <NavLink
-          to="/shop/customers"
-          end
-          className={({ isActive }) =>
-            `rounded-lg py-2.5 text-center text-sm font-medium transition ${
-              isActive ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-500'
-            }`
-          }
-        >
-          العملاء
-        </NavLink>
-        <NavLink
-          to="/shop/dashboard"
-          end
-          className={({ isActive }) =>
-            `rounded-lg py-2.5 text-center text-sm font-medium transition ${
-              isActive ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-500'
-            }`
-          }
-        >
-          لوحة التحكم
-        </NavLink>
-      </div>
-
       {/* Search + add */}
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">

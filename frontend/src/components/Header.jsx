@@ -6,13 +6,17 @@ export default function Header({ title, subtitle, onMenu, userName = 'مستخد
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-4 border-b border-slate-100 bg-white/90 px-4 py-3.5 backdrop-blur md:px-6">
       <div className="flex items-center gap-3">
-        <button
-          onClick={onMenu}
-          className="rounded-lg p-1.5 text-ink-500 hover:bg-slate-100 lg:hidden"
-          aria-label="القائمة"
-        >
-          <IconMenu className="h-6 w-6" />
-        </button>
+        {/* Hamburger only when a menu handler is provided (admin uses a drawer;
+            the shop-owner pages use top tabs and pass no onMenu). */}
+        {onMenu && (
+          <button
+            onClick={onMenu}
+            className="rounded-lg p-1.5 text-ink-500 hover:bg-slate-100 lg:hidden"
+            aria-label="القائمة"
+          >
+            <IconMenu className="h-6 w-6" />
+          </button>
+        )}
         <div>
           <h1 className="text-base font-bold text-ink-900 md:text-lg">{title}</h1>
           {subtitle && <p className="text-xs text-ink-400">{subtitle}</p>}
