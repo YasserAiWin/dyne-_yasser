@@ -10,9 +10,11 @@ const navItems = [
   { to: '/shop/customers', label: 'العملاء', icon: IconUsers, end: true },
 ]
 
+// Shop-owner side is kept intentionally simple: no descriptive subtitles
+// on the main tabs (per the approved mobile-first design).
 const titles = {
-  '/shop/dashboard': ['لوحة التحكم', 'نظرة عامة على متجرك'],
-  '/shop/customers': ['العملاء', 'إدارة عملاء المتجر والديون'],
+  '/shop/dashboard': ['لوحة التحكم', ''],
+  '/shop/customers': ['العملاء', ''],
 }
 
 export default function ShopLayout() {

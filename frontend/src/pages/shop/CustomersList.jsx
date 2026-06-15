@@ -1,40 +1,40 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, NavLink } from 'react-router-dom'
 import Card from '../../components/Card'
-import DataTable from '../../components/DataTable'
-import StatusBadge from '../../components/StatusBadge'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
+import PayDebtSheet from '../../components/shop/PayDebtSheet'
 import { getCustomers, createCustomer } from '../../services/customersService'
+import { addDebt, addPayment } from '../../services/transactionsService'
 import { formatCurrency } from '../../utils/format'
-import { IconSearch, IconPlus, IconUser, IconPhone, IconClose } from '../../components/icons'
+import { IconSearch, IconPlus, IconUser, IconPhone, IconClose, IconCheck } from '../../components/icons'
 
-const FILTERS = [
-  { id: 'all', label: 'الكل' },
-  { id: 'debtor', label: 'مدين' },
-  { id: 'settled', label: 'مسدد' },
-  { id: 'credit', label: 'له رصيد' },
-]
+// Derive a status key from a numeric balance.
+function statusFromBalance(balance) {
+  if (balance > 0) return 'debtor'
+  if (balance < 0) return 'credit'
+  return 'settled'
+}
 
 export default function CustomersList() {
   const navigate = useNavigate()
   const [customers, setCustomers] = useState([])
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState('all')
   const [showAdd, setShowAdd] = useState(false)
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '' })
+
+  // Pay/debt bottom sheet
+  const [sheetCustomer, setSheetCustomer] = useState(null)
+  const [toast, setToast] = useState('')
 
   useEffect(() => {
     getCustomers().then(setCustomers)
   }, [])
 
   const filtered = useMemo(() => {
-    return customers.filter((c) => {
-      const matchesFilter = filter === 'all' || c.status === filter
-      const matchesQuery = !query || c.name.includes(query) || c.phone.includes(query)
-      return matchesFilter && matchesQuery
-    })
-  }, [customers, query, filter])
+    if (!query) return customers
+    return customers.filter((c) => c.name.includes(query) || c.phone.includes(query))
+  }, [customers, query])
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -44,70 +44,147 @@ export default function CustomersList() {
     setShowAdd(false)
   }
 
-  const columns = [
-    {
-      key: 'name',
-      header: 'العميل',
-      render: (r) => (
-        <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-sm font-bold text-primary-700">
-            {r.name.charAt(0)}
-          </span>
-          <span className="font-medium text-ink-900">{r.name}</span>
-        </div>
-      ),
-    },
-    { key: 'phone', header: 'رقم الهاتف', render: (r) => <span className="ltr-nums">{r.phone}</span> },
-    {
-      key: 'balance',
-      header: 'الرصيد الحالي',
-      render: (r) => {
-        const color = r.balance > 0 ? 'text-red-600' : r.balance < 0 ? 'text-blue-600' : 'text-ink-500'
-        return <span className={`ltr-nums font-bold ${color}`}>{formatCurrency(Math.abs(r.balance))}</span>
-      },
-    },
-    { key: 'status', header: 'الحالة', align: 'center', render: (r) => <StatusBadge status={r.status} /> },
-    {
-      key: 'actions',
-      header: 'الإجراءات',
-      align: 'center',
-      render: (r) => (
-        <Button variant="secondary" size="sm" onClick={() => navigate(`/shop/customers/${r.id}`)}>
-          عرض الملف
-        </Button>
-      ),
-    },
-  ]
+  function showToast(msg) {
+    setToast(msg)
+    setTimeout(() => setToast(''), 2500)
+  }
+
+  // Record a payment (decreases debt) or a new debt (increases it),
+  // then update the customer's balance in the list immediately.
+  async function handleSheetSubmit({ isPayment, amount, item }) {
+    const id = sheetCustomer.id
+    if (isPayment) {
+      await addPayment(id, { amount, note: item })
+    } else {
+      await addDebt(id, { amount, note: item })
+    }
+
+    const delta = isPayment ? -amount : amount
+    setCustomers((prev) =>
+      prev.map((c) => {
+        if (c.id !== id) return c
+        const newBalance = (c.balance ?? 0) + delta
+        return { ...c, balance: newBalance, status: statusFromBalance(newBalance) }
+      })
+    )
+    setSheetCustomer(null)
+    showToast(isPayment ? 'تم تسجيل الدفع بنجاح' : 'تم تسجيل الدين بنجاح')
+  }
 
   return (
     <div className="space-y-5">
-      <Card bodyClass="!p-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="w-full lg:max-w-sm">
-            <Input name="search" placeholder="ابحث باسم العميل أو رقم الهاتف..." value={query}
-              onChange={(e) => setQuery(e.target.value)} icon={<IconSearch className="h-5 w-5" />} />
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-              {FILTERS.map((f) => (
-                <button key={f.id} onClick={() => setFilter(f.id)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    filter === f.id ? 'bg-white text-primary-700 shadow-sm' : 'text-ink-500 hover:text-ink-700'
-                  }`}>
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowAdd(true)}>إضافة عميل</Button>
-          </div>
-        </div>
-      </Card>
+      {/* Two-tab switch: العملاء (active) / لوحة التحكم */}
+      <div className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+        <NavLink
+          to="/shop/customers"
+          end
+          className={({ isActive }) =>
+            `rounded-lg py-2.5 text-center text-sm font-medium transition ${
+              isActive ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-500'
+            }`
+          }
+        >
+          العملاء
+        </NavLink>
+        <NavLink
+          to="/shop/dashboard"
+          end
+          className={({ isActive }) =>
+            `rounded-lg py-2.5 text-center text-sm font-medium transition ${
+              isActive ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-500'
+            }`
+          }
+        >
+          لوحة التحكم
+        </NavLink>
+      </div>
 
-      <Card bodyClass="!p-0">
-        <div className="px-2 py-2">
-          <DataTable columns={columns} data={filtered} emptyText="لا يوجد عملاء مطابقون" />
+      {/* Search + add */}
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <Input
+            name="search"
+            placeholder="ابحث باسم العميل أو رقم الهاتف..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            icon={<IconSearch className="h-5 w-5" />}
+          />
         </div>
-      </Card>
+        <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowAdd(true)}>
+          إضافة عميل
+        </Button>
+      </div>
+
+      {/* Customer cards */}
+      <div className="space-y-3">
+        {filtered.length === 0 && (
+          <Card>
+            <p className="py-6 text-center text-sm text-ink-400">لا يوجد عملاء مطابقون</p>
+          </Card>
+        )}
+
+        {filtered.map((c) => {
+          const balance = c.balance ?? 0
+          const balanceColor = balance > 0 ? 'text-red-600' : balance < 0 ? 'text-blue-600' : 'text-ink-500'
+          return (
+            <Card key={c.id} bodyClass="!p-4">
+              <div className="flex items-start gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-50 text-base font-bold text-primary-700">
+                  {c.name.charAt(0)}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-bold text-ink-900">{c.name}</p>
+                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500">
+                        <IconPhone className="h-4 w-4 shrink-0" />
+                        <span className="ltr-nums truncate">{c.phone}</span>
+                      </p>
+                    </div>
+                    {/* Secondary action — replaces the old status badge slot */}
+                    <button
+                      onClick={() => navigate(`/shop/customers/${c.id}`)}
+                      className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-ink-500 hover:bg-slate-50 hover:text-primary-700"
+                    >
+                      عرض الملف
+                    </button>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs text-ink-400">الرصيد الحالي</p>
+                      <p className={`ltr-nums text-lg font-bold ${balanceColor}`}>
+                        {formatCurrency(Math.abs(balance))}
+                      </p>
+                    </div>
+                    {/* Primary action */}
+                    <Button onClick={() => setSheetCustomer(c)}>تسديد دين</Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Pay/debt bottom sheet */}
+      <PayDebtSheet
+        open={Boolean(sheetCustomer)}
+        customer={sheetCustomer}
+        onClose={() => setSheetCustomer(null)}
+        onSubmit={handleSheetSubmit}
+      />
+
+      {/* Success toast */}
+      {toast && (
+        <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
+          <div className="flex items-center gap-2 rounded-xl bg-ink-900 px-4 py-3 text-sm font-medium text-white shadow-soft">
+            <IconCheck className="h-4 w-4 text-primary-400" />
+            {toast}
+          </div>
+        </div>
+      )}
 
       {/* Add customer modal */}
       {showAdd && (
