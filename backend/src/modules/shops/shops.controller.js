@@ -79,6 +79,19 @@ class ShopsController {
   };
 
   /**
+   * Delete a shop permanently
+   */
+  deleteShop = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      await shopsService.deleteShop(id);
+      return successResponse(res, 'تم حذف المتجر بنجاح', null);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * Extend a shop's subscription duration
    */
   extendSubscription = async (req, res, next) => {

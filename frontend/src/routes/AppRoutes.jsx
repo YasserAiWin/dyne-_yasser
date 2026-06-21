@@ -5,10 +5,9 @@ import AdminLayout from '../layouts/AdminLayout'
 import ShopLayout from '../layouts/ShopLayout'
 
 import Login from '../pages/auth/Login'
+import AdminLogin from '../pages/auth/AdminLogin'
 import AdminDashboard from '../pages/admin/AdminDashboard'
 import ShopsList from '../pages/admin/ShopsList'
-import CreateShop from '../pages/admin/CreateShop'
-import SubscriptionManagement from '../pages/admin/SubscriptionManagement'
 import ShopDashboard from '../pages/shop/ShopDashboard'
 import CustomersList from '../pages/shop/CustomersList'
 import CustomerProfile from '../pages/shop/CustomerProfile'
@@ -16,7 +15,11 @@ import CustomerProfile from '../pages/shop/CustomerProfile'
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* Shop owner login */}
       <Route path="/login" element={<Login />} />
+
+      {/* Admin login — accessed by going to /admin/login directly */}
+      <Route path="/admin/login" element={<AdminLogin />} />
 
       {/* Admin area */}
       <Route
@@ -30,8 +33,8 @@ export default function AppRoutes() {
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="shops" element={<ShopsList />} />
-        <Route path="shops/create" element={<CreateShop />} />
-        <Route path="subscriptions" element={<SubscriptionManagement />} />
+        <Route path="shops/create" element={<Navigate to="/admin/shops" replace />} />
+        <Route path="subscriptions" element={<Navigate to="/admin/shops" replace />} />
       </Route>
 
       {/* Shop owner area */}
@@ -43,13 +46,12 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/shop/dashboard" replace />} />
+        <Route index element={<Navigate to="/shop/customers" replace />} />
         <Route path="dashboard" element={<ShopDashboard />} />
         <Route path="customers" element={<CustomersList />} />
         <Route path="customers/:id" element={<CustomerProfile />} />
       </Route>
 
-      {/* Fallbacks */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

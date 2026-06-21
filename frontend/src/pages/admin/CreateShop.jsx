@@ -16,7 +16,7 @@ export default function CreateShop() {
     name: '',
     ownerName: '',
     phone: '',
-    password: '',
+    pin: '',
     plan: 'yearly',
     customEndDate: '',
   })
@@ -25,6 +25,11 @@ export default function CreateShop() {
 
   function update(e) {
     const { name, value } = e.target
+    if (name === 'pin') {
+      const digits = value.replace(/\D/g, '').slice(0, 8)
+      setForm((f) => ({ ...f, pin: digits }))
+      return
+    }
     setForm((f) => ({ ...f, [name]: value }))
   }
 
@@ -41,10 +46,16 @@ export default function CreateShop() {
     setSaving(true)
     try {
       await createShop({
-        ...form,
+        shopName: form.name,
+        ownerName: form.ownerName,
+        phone: form.phone,
+        pin: form.pin,
         startDate: today,
-        endDate: computedEndDate,
-        plan: selectedPlan?.label,
+        expiryDate: computedEndDate,
+        subscriptionDuration: form.plan === 'yearly' ? '1_year'
+          : form.plan === '6months' ? '6_months'
+          : form.plan === '3months' ? '3_months'
+          : '1_month',
       })
       setDone(true)
       setTimeout(() => navigate('/admin/shops'), 900)
@@ -66,8 +77,10 @@ export default function CreateShop() {
             <Input label="رقم الهاتف" name="phone" type="tel" value={form.phone} onChange={update}
               placeholder="+222 XX XX XX XX" icon={<IconPhone className="h-5 w-5" />} required
               hint="يُستخدم رقم الهاتف لتسجيل دخول صاحب المتجر" />
-            <Input label="كلمة المرور" name="password" type="password" value={form.password} onChange={update}
-              placeholder="••••••••" icon={<IconLock className="h-5 w-5" />} required />
+            <Input label="الرمز السري" name="pin" type="password" inputMode="numeric" pattern="[0-9]*"
+              value={form.pin} onChange={update} maxLength={8}
+              placeholder="••••••••" icon={<IconLock className="h-5 w-5" />} required
+              hint="4 إلى 8 أرقام فقط — لا يقبل حروف" />
           </div>
         </Card>
 

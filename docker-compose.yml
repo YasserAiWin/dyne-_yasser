@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: abidb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shop_debt_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - abidb_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shop_debt_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  abidb_pgdata:
+    driver: local

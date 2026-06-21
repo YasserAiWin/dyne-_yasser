@@ -2,36 +2,29 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../../components/Button'
 import { login } from '../../services/authService'
-import { IconPhone, IconLock } from '../../components/icons'
+import { IconEmail, IconLock } from '../../components/icons'
 
-export default function Login() {
-  const [form, setForm] = useState({ phone: '', pin: '' })
+export default function AdminLogin() {
+  const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
   function update(e) {
     const { name, value } = e.target
-    if (name === 'pin') {
-      setForm((f) => ({ ...f, pin: value.replace(/\D/g, '').slice(0, 8) }))
-      return
-    }
     setForm((f) => ({ ...f, [name]: value }))
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    if (!form.phone.trim()) { setError('أدخل رقم الهاتف'); return }
-    if (form.pin.length < 4) { setError('الرمز السري يجب أن يكون 4 أرقام على الأقل'); return }
-
     setLoading(true)
     try {
-      await login({ role: 'owner', phone: form.phone, pin: form.pin })
-      navigate('/shop/customers')
+      await login({ role: 'admin', email: form.email, password: form.password })
+      navigate('/admin/dashboard')
     } catch (err) {
       const msg = err?.response?.data?.message
-      setError(msg || 'رقم الهاتف أو الرمز السري غير صحيح')
+      setError(msg || 'البريد الإلكتروني أو كلمة المرور غير صحيحة')
     } finally {
       setLoading(false)
     }
@@ -42,61 +35,56 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="card p-6 sm:p-8">
 
-          {/* Brand */}
           <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-600 text-2xl font-bold text-white shadow-md">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-900 text-2xl font-bold text-white shadow-md">
               د
             </div>
             <div className="text-center">
-              <h1 className="text-xl font-bold text-ink-900">نظام إدارة الديون</h1>
-              <p className="mt-0.5 text-sm text-ink-400">تسجيل دخول صاحب المستودع</p>
+              <h1 className="text-xl font-bold text-ink-900">لوحة المدير العام</h1>
+              <p className="mt-0.5 text-sm text-ink-400">للمديرين فقط</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
-            {/* Phone */}
+            {/* Email */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">رقم الهاتف</label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700">البريد الإلكتروني</label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-ink-400">
-                  <IconPhone className="h-5 w-5" />
+                  <IconEmail className="h-5 w-5" />
                 </span>
                 <input
-                  name="phone"
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="XX XX XX XX"
-                  value={form.phone}
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  placeholder="admin@example.com"
+                  value={form.email}
                   onChange={update}
                   className="input-base w-full pr-10"
-                  autoComplete="tel"
+                  autoComplete="email"
                   autoFocus
+                  required
                 />
               </div>
             </div>
 
-            {/* PIN */}
+            {/* Password */}
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-ink-700">
-                الرمز السري
-                <span className="mr-1.5 text-xs font-normal text-ink-400">(أرقام فقط)</span>
-              </label>
+              <label className="mb-1.5 block text-sm font-medium text-ink-700">كلمة المرور</label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-ink-400">
                   <IconLock className="h-5 w-5" />
                 </span>
                 <input
-                  name="pin"
+                  name="password"
                   type="password"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
                   placeholder="••••••••"
-                  value={form.pin}
+                  value={form.password}
                   onChange={update}
-                  maxLength={8}
-                  className="input-base w-full pr-10 tracking-widest"
+                  className="input-base w-full pr-10"
                   autoComplete="current-password"
+                  required
                 />
               </div>
             </div>
@@ -108,7 +96,7 @@ export default function Login() {
             )}
 
             <Button type="submit" size="lg" className="w-full" disabled={loading}>
-              {loading ? 'جارٍ الدخول...' : 'تسجيل الدخول'}
+              {loading ? 'جارٍ الدخول...' : 'دخول'}
             </Button>
           </form>
         </div>

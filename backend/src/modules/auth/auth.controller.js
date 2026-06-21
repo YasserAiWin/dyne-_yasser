@@ -2,16 +2,12 @@ const authService = require('./auth.service');
 const { successResponse } = require('../../utils/apiResponse');
 
 class AuthController {
-  /**
-   * Handle user login request
-   */
   login = async (req, res, next) => {
     try {
-      const { phone, password } = req.body;
-      const result = await authService.login({ phone, password });
-      return successResponse(res, 'Login successful', result);
+      const { phone, pin, email, password } = req.body;
+      const result = await authService.login({ phone, pin, email, password });
+      return successResponse(res, 'تم تسجيل الدخول بنجاح', result);
     } catch (error) {
-      // Catch specific shop subscription/suspension errors and return them cleanly
       if (error.code === 'SHOP_SUSPENDED' || error.code === 'SUBSCRIPTION_EXPIRED') {
         return res.status(error.statusCode || 403).json({
           success: false,
@@ -23,13 +19,9 @@ class AuthController {
     }
   };
 
-  /**
-   * Return the authenticated user profile
-   */
   me = async (req, res, next) => {
     try {
-      // req.user is attached by authMiddleware
-      return successResponse(res, 'Current user profile retrieved', { user: req.user });
+      return successResponse(res, 'تم جلب بيانات المستخدم', { user: req.user });
     } catch (error) {
       next(error);
     }

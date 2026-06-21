@@ -4,6 +4,7 @@ import Card from '../../components/Card'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 import PayDebtSheet from '../../components/shop/PayDebtSheet'
+import CustomerEditSheet from '../../components/shop/CustomerEditSheet'
 import { getCustomers, createCustomer } from '../../services/customersService'
 import { addDebt, addPayment } from '../../services/transactionsService'
 import { formatCurrency } from '../../utils/format'
@@ -25,6 +26,8 @@ export default function CustomersList() {
 
   // Pay/debt bottom sheet
   const [sheetCustomer, setSheetCustomer] = useState(null)
+  // Edit/delete sheet
+  const [editCustomer, setEditCustomer] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
@@ -36,12 +39,19 @@ export default function CustomersList() {
     return customers.filter((c) => c.name.includes(query) || c.phone.includes(query))
   }, [customers, query])
 
+  const [addError, setAddError] = useState('')
+
   async function handleAdd(e) {
     e.preventDefault()
-    const created = await createCustomer(newCustomer)
-    setCustomers((prev) => [created, ...prev])
-    setNewCustomer({ name: '', phone: '' })
-    setShowAdd(false)
+    setAddError('')
+    try {
+      const created = await createCustomer(newCustomer)
+      setCustomers((prev) => [{ balance: 0, ...created }, ...prev])
+      setNewCustomer({ name: '', phone: '' })
+      setShowAdd(false)
+    } catch (err) {
+      setAddError(err?.response?.data?.message || 'فشل إضافة العميل')
+    }
   }
 
   function showToast(msg) {
@@ -84,7 +94,7 @@ export default function CustomersList() {
             icon={<IconSearch className="h-5 w-5" />}
           />
         </div>
-        <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowAdd(true)}>
+        <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => { setShowAdd(true); setAddError('') }}>
           إضافة عميل
         </Button>
       </div>
@@ -116,13 +126,20 @@ export default function CustomersList() {
                         <span className="ltr-nums truncate">{c.phone}</span>
                       </p>
                     </div>
-                    {/* Secondary action — replaces the old status badge slot */}
-                    <button
-                      onClick={() => navigate(`/shop/customers/${c.id}`)}
-                      className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium text-ink-500 hover:bg-slate-50 hover:text-primary-700"
-                    >
-                      عرض الملف
-                    </button>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => setEditCustomer(c)}
+                        className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-500 hover:bg-slate-50 hover:text-ink-800"
+                      >
+                        تعديل
+                      </button>
+                      <button
+                        onClick={() => navigate(`/shop/customers/${c.id}`)}
+                        className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-500 hover:bg-slate-50 hover:text-primary-700"
+                      >
+                        الملف
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-3">
@@ -133,7 +150,7 @@ export default function CustomersList() {
                       </p>
                     </div>
                     {/* Primary action */}
-                    <Button onClick={() => setSheetCustomer(c)}>تسديد دين</Button>
+                    <Button onClick={() => setSheetCustomer(c)}>تسجيل دين</Button>
                   </div>
                 </div>
               </div>
@@ -148,6 +165,23 @@ export default function CustomersList() {
         customer={sheetCustomer}
         onClose={() => setSheetCustomer(null)}
         onSubmit={handleSheetSubmit}
+      />
+
+      {/* Edit/delete sheet */}
+      <CustomerEditSheet
+        open={Boolean(editCustomer)}
+        customer={editCustomer}
+        onClose={() => setEditCustomer(null)}
+        onUpdated={(updated) => {
+          setCustomers((prev) => prev.map((c) => c.id === updated?.id ? { ...c, ...updated } : c))
+          setEditCustomer(null)
+          showToast('تم تحديث بيانات العميل')
+        }}
+        onDeleted={(id) => {
+          setCustomers((prev) => prev.filter((c) => c.id !== id))
+          setEditCustomer(null)
+          showToast('تم حذف العميل')
+        }}
       />
 
       {/* Success toast */}
@@ -176,7 +210,10 @@ export default function CustomersList() {
                 placeholder="الاسم الكامل" icon={<IconUser className="h-5 w-5" />} required />
               <Input label="رقم الهاتف" value={newCustomer.phone}
                 onChange={(e) => setNewCustomer((c) => ({ ...c, phone: e.target.value }))}
-                placeholder="+222 XX XX XX XX" icon={<IconPhone className="h-5 w-5" />} required />
+                placeholder="XX XX XX XX" icon={<IconPhone className="h-5 w-5" />} />
+              {addError && (
+                <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm text-red-600">{addError}</div>
+              )}
               <div className="flex gap-3 pt-2">
                 <Button type="submit" className="flex-1">إضافة العميل</Button>
                 <Button type="button" variant="secondary" onClick={() => setShowAdd(false)}>إلغاء</Button>

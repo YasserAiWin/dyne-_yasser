@@ -84,6 +84,9 @@ CREATE TABLE "ShopWhatsappSetting" (
 CREATE UNIQUE INDEX "User_phone_key" ON "User"("phone");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE INDEX "Shop_expiryDate_idx" ON "Shop"("expiryDate");
 
 -- CreateIndex

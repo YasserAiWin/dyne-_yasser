@@ -1,8 +1,6 @@
 import api, { USE_MOCK, mockDelay, unwrapApiResponse } from './api'
 
-// Map backend roles (SUPER_ADMIN / SHOP_OWNER) to the frontend's
-// internal role keys (admin / owner) used by routing and guards.
-// Already-normalized values pass through unchanged.
+// Map backend roles (SUPER_ADMIN / SHOP_OWNER) → frontend keys (admin / owner)
 export function normalizeUserRole(role) {
   switch (role) {
     case 'SUPER_ADMIN':
@@ -16,8 +14,6 @@ export function normalizeUserRole(role) {
   }
 }
 
-// Store the user with a normalized `role` (so routing/guards work) while
-// preserving the backend's original value under `rawRole`.
 function persistUser(user) {
   if (!user) return user
   const normalized = {
@@ -29,16 +25,19 @@ function persistUser(user) {
   return normalized
 }
 
-// role: 'admin' | 'owner' — used for mock routing only.
-// Real API derives the role from the returned user/JWT, not from the request.
-export async function login({ phone, password, role }) {
+/**
+ * Login.
+ * - role === 'owner': sends { phone, pin }
+ * - role === 'admin':  sends { email, password }
+ */
+export async function login({ role, phone, pin, email, password }) {
   if (USE_MOCK) {
-    // Accept any credentials in mock mode.
     const user = {
       id: role === 'admin' ? 0 : 1,
-      name: role === 'admin' ? 'المدير العام' : 'صاحب المتجر',
+      name: role === 'admin' ? 'المدير العام' : 'صاحب المستودع',
       role,
-      phone,
+      phone: phone || '',
+      email: email || '',
     }
     const token = `mock-token-${role}`
     localStorage.setItem('token', token)
@@ -46,22 +45,25 @@ export async function login({ phone, password, role }) {
     return mockDelay({ user, token })
   }
 
-  const { data } = await api.post('/auth/login', { phone, password })
-  const payload = unwrapApiResponse(data)
+  const payload = role === 'admin'
+    ? { email: email.toLowerCase().trim(), password }
+    : { phone, pin }
 
-  if (payload.token) {
-    localStorage.setItem('token', payload.token)
-    payload.user = persistUser(payload.user)
+  const { data } = await api.post('/auth/login', payload)
+  const result = unwrapApiResponse(data)
+
+  if (result.token) {
+    localStorage.setItem('token', result.token)
+    result.user = persistUser(result.user)
   }
-  return payload
+  return result
 }
 
 export async function getMe() {
   if (USE_MOCK) return mockDelay(getCurrentUser())
   const { data } = await api.get('/auth/me')
   const payload = unwrapApiResponse(data)
-  const user = persistUser(payload.user || payload)
-  return user
+  return persistUser(payload.user || payload)
 }
 
 export function logout() {

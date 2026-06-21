@@ -1,113 +1,137 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import Card from '../../components/Card'
-import DataTable from '../../components/DataTable'
 import StatusBadge from '../../components/StatusBadge'
 import Button from '../../components/Button'
-import Input from '../../components/Input'
 import { getShops } from '../../services/shopsService'
-import { formatDate, daysRemaining } from '../../utils/format'
+import { formatDateShort } from '../../utils/format'
 import { IconSearch, IconPlus } from '../../components/icons'
+import ManageShopModal from '../../components/admin/ManageShopModal'
+import CreateShopModal from '../../components/admin/CreateShopModal'
+import { useLang } from '../../contexts/LanguageContext'
+import strings from '../../utils/translations'
 
-const FILTERS = [
-  { id: 'all', label: 'الكل' },
-  { id: 'active', label: 'نشط' },
-  { id: 'expiring', label: 'قرب الانتهاء' },
-  { id: 'expired', label: 'منتهي' },
-]
+function matchesFilter(shop, filter) {
+  if (filter === 'all') return true
+  if (filter === 'issues') return ['EXPIRED', 'EXPIRING_SOON', 'SUSPENDED'].includes(shop.status)
+  return shop.status === filter
+}
 
 export default function ShopsList() {
   const [shops, setShops] = useState([])
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
+  const [managing, setManaging] = useState(null)
+  const [showCreate, setShowCreate] = useState(false)
+  const { lang } = useLang()
+  const t = strings[lang]
 
-  useEffect(() => {
-    getShops().then(setShops)
-  }, [])
+  const FILTERS = [
+    { id: 'all', label: t.all },
+    { id: 'ACTIVE', label: t.active },
+    { id: 'issues', label: t.alerts },
+  ]
+
+  function loadShops() { getShops().then(setShops) }
+  useEffect(() => { loadShops() }, [])
 
   const filtered = useMemo(() => {
     return shops.filter((s) => {
-      const matchesFilter = filter === 'all' || s.status === filter
-      const matchesQuery =
-        !query ||
-        s.name.includes(query) ||
-        s.ownerName.includes(query) ||
-        s.phone.includes(query)
-      return matchesFilter && matchesQuery
+      const matchFilter = matchesFilter(s, filter)
+      const q = query.toLowerCase()
+      const matchQuery = !q ||
+        (s.shopName || '').toLowerCase().includes(q) ||
+        (s.ownerName || '').toLowerCase().includes(q) ||
+        (s.phone || '').includes(q)
+      return matchFilter && matchQuery
     })
   }, [shops, query, filter])
 
-  const columns = [
-    { key: 'name', header: 'اسم المتجر', render: (r) => <span className="font-medium text-ink-900">{r.name}</span> },
-    { key: 'ownerName', header: 'صاحب المتجر' },
-    { key: 'startDate', header: 'تاريخ البداية', render: (r) => <span className="ltr-nums">{formatDate(r.startDate)}</span> },
-    { key: 'endDate', header: 'تاريخ الانتهاء', render: (r) => <span className="ltr-nums">{formatDate(r.endDate)}</span> },
-    {
-      key: 'days',
-      header: 'الأيام المتبقية',
-      align: 'center',
-      render: (r) => {
-        const d = daysRemaining(r.endDate)
-        const color = d < 0 ? 'text-red-600' : d <= 30 ? 'text-orange-600' : 'text-ink-700'
-        return <span className={`ltr-nums font-medium ${color}`}>{d < 0 ? `متأخر ${Math.abs(d)}` : d}</span>
-      },
-    },
-    { key: 'status', header: 'الحالة', align: 'center', render: (r) => <StatusBadge status={r.status} /> },
-    {
-      key: 'actions',
-      header: 'الإجراءات',
-      align: 'center',
-      render: (r) => (
-        <div className="flex items-center justify-center gap-2">
-          <Button variant="secondary" size="sm">تعديل</Button>
-          <Link to="/admin/subscriptions">
-            <Button variant="primary" size="sm">تمديد الاشتراك</Button>
-          </Link>
-        </div>
-      ),
-    },
-  ]
+  function handleUpdated() { loadShops(); setManaging(null) }
 
   return (
-    <div className="space-y-5">
-      <Card bodyClass="!p-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="w-full lg:max-w-sm">
-            <Input
-              name="search"
-              placeholder="ابحث باسم المتجر أو المالك أو الهاتف..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              icon={<IconSearch className="h-5 w-5" />}
-            />
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setFilter(f.id)}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    filter === f.id ? 'bg-white text-primary-700 shadow-sm' : 'text-ink-500 hover:text-ink-700'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            <Link to="/admin/shops/create">
-              <Button icon={<IconPlus className="h-4 w-4" />}>إضافة متجر</Button>
-            </Link>
-          </div>
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-xs">
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-ink-400">
+            <IconSearch className="h-4 w-4" />
+          </span>
+          <input
+            type="search"
+            placeholder={t.search}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="input-base w-full pr-9 text-sm"
+          />
         </div>
-      </Card>
 
-      <Card bodyClass="!p-0">
-        <div className="px-2 py-2">
-          <DataTable columns={columns} data={filtered} emptyText="لا توجد متاجر مطابقة" />
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+            {FILTERS.map((f) => (
+              <button key={f.id} onClick={() => setFilter(f.id)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                  filter === f.id ? 'bg-white text-primary-700 shadow-sm' : 'text-ink-500 hover:text-ink-700'
+                }`}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowCreate(true)}>
+            {t.addShop}
+          </Button>
         </div>
-      </Card>
+      </div>
+
+      {/* List */}
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+        {filtered.length === 0 ? (
+          <p className="py-12 text-center text-sm text-ink-400">{t.noShops}</p>
+        ) : (
+          <div className="divide-y divide-slate-50">
+            {filtered.map((shop) => {
+              const today = new Date(); today.setHours(0,0,0,0)
+              const end = new Date(shop.expiryDate)
+              const days = Math.round((end - today) / 86400000)
+              const daysColor = days < 0 ? 'text-red-600' : days <= 7 ? 'text-orange-600' : 'text-ink-500'
+              return (
+                <div key={shop.id} className="flex items-center gap-4 px-4 py-3.5">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-sm font-bold text-primary-700">
+                    {(shop.shopName || '?').charAt(0)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-ink-900">{shop.shopName}</p>
+                    <p className="truncate text-sm text-ink-500">
+                      {shop.ownerName}
+                      {shop.phone && <span className="ltr-nums mx-2 text-ink-400">· {shop.phone}</span>}
+                    </p>
+                  </div>
+                  <div className="hidden text-end sm:block min-w-[90px]">
+                    <p className={`ltr-nums text-base font-bold tabular-nums ${daysColor}`}>
+                      {days < 0 ? `-${Math.abs(days)}` : days}
+                      <span className="mr-1 text-xs font-medium">{lang === 'en' ? 'd' : 'ي'}</span>
+                    </p>
+                    <p className="ltr-nums mt-0.5 text-xs text-ink-400" style={{ direction: 'ltr' }}>
+                      {formatDateShort(shop.expiryDate, lang === 'en' ? 'en-US' : 'ar-EG-u-nu-latn')}
+                    </p>
+                  </div>
+                  <div className="hidden sm:block">
+                    <StatusBadge status={shop.status} />
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={() => setManaging(shop)}>
+                    {t.edit}
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {showCreate && (
+        <CreateShopModal onClose={() => setShowCreate(false)} onCreated={() => { loadShops(); setShowCreate(false) }} />
+      )}
+      {managing && (
+        <ManageShopModal shop={managing} onClose={() => setManaging(null)} onUpdated={handleUpdated} />
+      )}
     </div>
   )
 }

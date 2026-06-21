@@ -44,13 +44,16 @@ export async function getShopStats() {
 export async function createCustomer(payload) {
   if (USE_MOCK) return mockDelay({ id: Date.now(), balance: 0, status: 'settled', ...payload })
   const { data } = await api.post('/shop/customers', payload)
-  return unwrapApiResponse(data)
+  const result = unwrapApiResponse(data)
+  // Backend wraps as { customer: {...} } — normalize to flat object
+  return result?.customer ?? result
 }
 
 export async function updateCustomer(id, payload) {
   if (USE_MOCK) return mockDelay({ id, ...payload })
   const { data } = await api.put(`/shop/customers/${id}`, payload)
-  return unwrapApiResponse(data)
+  const result = unwrapApiResponse(data)
+  return result?.customer ?? result
 }
 
 export async function deleteCustomer(id) {

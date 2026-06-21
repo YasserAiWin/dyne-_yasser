@@ -65,8 +65,8 @@ class ShopsService {
    * Create Shop, Owner User, and ShopWhatsappSetting inside a single prisma.$transaction
    */
   async createShop(shopData) {
-    const { shopName, ownerName, phone, password, startDate, expiryDate, subscriptionDuration } = shopData;
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const { shopName, ownerName, phone, pin, startDate, expiryDate, subscriptionDuration } = shopData;
+    const passwordHash = bcrypt.hashSync(pin, 10);
 
     // Calculate expiryDate from subscriptionDuration or use expiryDate directly
     let calculatedExpiry = expiryDate ? new Date(expiryDate) : null;
@@ -218,6 +218,19 @@ class ShopsService {
       ...activatedShop,
       status: getShopStatus(activatedShop.expiryDate, activatedShop.isSuspended),
     };
+  }
+
+  /**
+   * Delete a shop and all related data (cascades via Prisma)
+   */
+  async deleteShop(id) {
+    const shop = await prisma.shop.findUnique({ where: { id } });
+    if (!shop) {
+      const error = new Error('Shop not found');
+      error.statusCode = 404;
+      throw error;
+    }
+    await prisma.shop.delete({ where: { id } });
   }
 
   /**

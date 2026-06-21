@@ -15,6 +15,7 @@ router.get('/shops', shopsController.getAllShops);
 router.post('/shops', validate(createShopSchema), shopsController.createShop);
 router.get('/shops/:id', validate(getShopSchema), shopsController.getShopById);
 router.put('/shops/:id', validate(updateShopSchema), shopsController.updateShop);
+router.delete('/shops/:id', validate(getShopSchema), shopsController.deleteShop);
 router.patch('/shops/:id/suspend', validate(getShopSchema), shopsController.suspendShop);
 router.patch('/shops/:id/activate', validate(getShopSchema), shopsController.activateShop);
 router.post('/shops/:id/extend-subscription', validate(extendSubscriptionSchema), shopsController.extendSubscription);

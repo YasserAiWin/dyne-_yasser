@@ -1,7 +1,6 @@
 import api, { USE_MOCK, mockDelay, unwrapApiResponse } from './api'
 import { shops, adminStats } from '../data/mockData'
 
-// Normalize a shops payload that may be an array or { shops: [...] }.
 function toShopsArray(payload) {
   if (Array.isArray(payload)) return payload
   if (payload && Array.isArray(payload.shops)) return payload.shops
@@ -18,11 +17,9 @@ export async function getShop(id) {
   if (USE_MOCK) return mockDelay(shops.find((s) => s.id === Number(id)) || null)
   const { data } = await api.get(`/admin/shops/${id}`)
   const payload = unwrapApiResponse(data)
-  // Backend may wrap the entity as { shop: {...} }.
   return payload?.shop ?? payload
 }
 
-// Map backend admin dashboard fields to the keys the UI expects.
 function normalizeAdminStats(p) {
   if (!p || typeof p !== 'object') return p
   return {
@@ -41,20 +38,8 @@ export async function getAdminStats() {
   return normalizeAdminStats(unwrapApiResponse(data))
 }
 
-export async function getExpiringShops() {
-  if (USE_MOCK) return mockDelay(shops.filter((s) => s.status === 'expiring'))
-  const { data } = await api.get('/admin/shops-expiring')
-  return toShopsArray(unwrapApiResponse(data))
-}
-
-export async function getExpiredShops() {
-  if (USE_MOCK) return mockDelay(shops.filter((s) => s.status === 'expired'))
-  const { data } = await api.get('/admin/shops-expired')
-  return toShopsArray(unwrapApiResponse(data))
-}
-
 export async function createShop(payload) {
-  if (USE_MOCK) return mockDelay({ id: Date.now(), ...payload, status: 'active' })
+  if (USE_MOCK) return mockDelay({ id: Date.now(), ...payload, status: 'ACTIVE' })
   const { data } = await api.post('/admin/shops', payload)
   return unwrapApiResponse(data)
 }
@@ -65,7 +50,23 @@ export async function updateShop(id, payload) {
   return unwrapApiResponse(data)
 }
 
-// Extend a subscription. payload: { newEndDate }
+export async function deleteShop(id) {
+  if (USE_MOCK) return mockDelay({ id })
+  await api.delete(`/admin/shops/${id}`)
+}
+
+export async function suspendShop(id) {
+  if (USE_MOCK) return mockDelay({ id, status: 'SUSPENDED' })
+  const { data } = await api.patch(`/admin/shops/${id}/suspend`)
+  return unwrapApiResponse(data)
+}
+
+export async function activateShop(id) {
+  if (USE_MOCK) return mockDelay({ id, status: 'ACTIVE' })
+  const { data } = await api.patch(`/admin/shops/${id}/activate`)
+  return unwrapApiResponse(data)
+}
+
 export async function extendSubscription(id, payload) {
   if (USE_MOCK) return mockDelay({ id, ...payload })
   const { data } = await api.post(`/admin/shops/${id}/extend-subscription`, payload)

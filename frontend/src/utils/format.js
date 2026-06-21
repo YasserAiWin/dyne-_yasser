@@ -11,12 +11,20 @@ export function formatNumber(n) {
   return (Number(n) || 0).toLocaleString('en-US')
 }
 
-// ISO date (YYYY-MM-DD) -> localized Arabic date.
-export function formatDate(iso) {
+// Full date — always Latin numerals.
+export function formatDate(iso, locale = 'ar-EG-u-nu-latn') {
   if (!iso) return '—'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+  return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })
+}
+
+// Short compact date: "21 أغس 2026" or "21 Aug 2026" — for tight list rows.
+export function formatDateShort(iso, locale = 'ar-EG-u-nu-latn') {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 // Whole days between today and an end date (negative = already passed).

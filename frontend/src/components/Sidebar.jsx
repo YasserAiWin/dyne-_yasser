@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { IconLogout, IconClose } from './icons'
 
 // Generic sidebar. `items` is [{ to, label, icon }]. Sits on the RIGHT (RTL).
-export default function Sidebar({ items, title, subtitle, open, onClose, onLogout }) {
+export default function Sidebar({ items, title, subtitle, open, onClose, onLogout, logoutLabel = 'تسجيل الخروج' }) {
   return (
     <>
       {/* Mobile overlay */}
@@ -64,7 +64,7 @@ export default function Sidebar({ items, title, subtitle, open, onClose, onLogou
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
           >
             <IconLogout className="h-5 w-5" />
-            تسجيل الخروج
+            {logoutLabel}
           </button>
         </div>
       </aside>
