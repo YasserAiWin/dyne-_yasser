@@ -1,4 +1,5 @@
 const prisma = require('../../prisma/client');
+const whatsappService = require('../whatsapp/whatsapp.service');
 
 class TransactionsService {
   /**
@@ -45,7 +46,7 @@ class TransactionsService {
     }
 
     // Run verification and insertion inside a transaction for complete safety
-    return prisma.$transaction(async (tx) => {
+    const transaction = await prisma.$transaction(async (tx) => {
       // 1. Verify customer exists, belongs to the shop, and is active
       const customer = await tx.customer.findFirst({
         where: {
@@ -74,6 +75,14 @@ class TransactionsService {
         },
       });
     });
+
+    try {
+      await whatsappService.notifyCustomerTransaction(shopId, customerId, transaction.id);
+    } catch (error) {
+      console.error('WhatsApp notification pipeline failed:', error.message);
+    }
+
+    return transaction;
   }
 }
 

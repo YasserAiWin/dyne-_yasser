@@ -91,6 +91,10 @@ model ShopWhatsappSetting {
   id               String   @id @default(uuid()) @db.Uuid
   shopId           String   @unique @db.Uuid
   provider         String   @default("EVOLUTION")
+  apiUrl           String?
+  apiKey           String?
+  instanceName     String?
+  senderPhone      String?
   instanceId       String?
   instanceToken    String?
   connectionStatus String   @default("DISCONNECTED")
@@ -100,4 +104,20 @@ model ShopWhatsappSetting {
   updatedAt        DateTime @updatedAt
 
   shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+}
+
+model WhatsappMessageLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  shopId        String   @db.Uuid
+  customerId    String?  @db.Uuid
+  transactionId String?  @db.Uuid
+  recipient     String
+  messageType   String
+  status        String
+  errorMessage  String?
+  createdAt     DateTime @default(now())
+
+  @@index([shopId])
+  @@index([customerId])
+  @@index([transactionId])
 }

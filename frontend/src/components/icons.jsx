@@ -37,6 +37,9 @@ export const IconMenu = (p) => (
 export const IconClose = (p) => (
   <svg {...base} {...p}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
 )
+export const IconDownload = (p) => (
+  <svg {...base} {...p}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4.5 18.75h15" /></svg>
+)
 export const IconClock = (p) => (
   <svg {...base} {...p}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
 )

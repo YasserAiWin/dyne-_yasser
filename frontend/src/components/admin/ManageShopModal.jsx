@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
-import { updateShop, extendSubscription, suspendShop, activateShop, deleteShop } from '../../services/shopsService'
+import {
+  updateShop,
+  extendSubscription,
+  suspendShop,
+  activateShop,
+  deleteShop,
+  getShopWhatsappSettings,
+  updateShopWhatsappSettings,
+} from '../../services/shopsService'
 import { formatDateShort, daysRemaining } from '../../utils/format'
 import { IconClose, IconWarning } from '../icons'
 import { useLang } from '../../contexts/LanguageContext'
@@ -9,7 +17,17 @@ const EXTEND_MONTHS = [1, 3, 6, 12]
 
 export default function ManageShopModal({ shop, onClose, onUpdated }) {
   const [form, setForm] = useState({ shopName: '', ownerName: '', phone: '' })
+  const [whatsappForm, setWhatsappForm] = useState({
+    apiUrl: '',
+    apiKey: '',
+    instanceName: '',
+    senderPhone: '',
+    connectionStatus: 'DISCONNECTED',
+    hasApiKey: false,
+  })
   const [saving, setSaving] = useState(false)
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false)
+  const [loadingWhatsapp, setLoadingWhatsapp] = useState(false)
   const [extending, setExtending] = useState(null)
   const [customDate, setCustomDate] = useState('')
   const [settingDate, setSettingDate] = useState(false)
@@ -26,6 +44,31 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
       setCustomDate(shop.expiryDate ? new Date(shop.expiryDate).toISOString().slice(0, 10) : '')
       setConfirmDelete(false)
       setError('')
+      setWhatsappForm({
+        apiUrl: '',
+        apiKey: '',
+        instanceName: '',
+        senderPhone: '',
+        connectionStatus: 'DISCONNECTED',
+        hasApiKey: false,
+      })
+      setLoadingWhatsapp(true)
+      getShopWhatsappSettings(shop.id)
+        .then((payload) => {
+          const settings = payload?.settings || payload || {}
+          setWhatsappForm({
+            apiUrl: settings.apiUrl || '',
+            apiKey: '',
+            instanceName: settings.instanceName || settings.instanceId || '',
+            senderPhone: settings.senderPhone || '',
+            connectionStatus: settings.connectionStatus || 'DISCONNECTED',
+            hasApiKey: Boolean(settings.hasApiKey),
+          })
+        })
+        .catch(() => {
+          setError('فشل تحميل إعدادات واتساب')
+        })
+        .finally(() => setLoadingWhatsapp(false))
     }
   }, [shop])
 
@@ -104,6 +147,37 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
     } catch (err) {
       setError(err?.response?.data?.message || 'فشل حذف المتجر')
       setDeleting(false)
+    }
+  }
+
+  async function handleSaveWhatsapp(e) {
+    e.preventDefault()
+    setSavingWhatsapp(true)
+    setError('')
+    try {
+      const payload = {
+        provider: 'EVOLUTION',
+        apiUrl: whatsappForm.apiUrl.trim() || null,
+        instanceName: whatsappForm.instanceName.trim() || null,
+        senderPhone: whatsappForm.senderPhone.trim() || null,
+        connectionStatus: whatsappForm.connectionStatus,
+      }
+
+      if (whatsappForm.apiKey.trim()) {
+        payload.apiKey = whatsappForm.apiKey.trim()
+      }
+
+      const result = await updateShopWhatsappSettings(shop.id, payload)
+      const settings = result?.settings || result || {}
+      setWhatsappForm((current) => ({
+        ...current,
+        apiKey: '',
+        hasApiKey: Boolean(settings.hasApiKey || current.apiKey.trim()),
+      }))
+    } catch (err) {
+      setError(err?.response?.data?.message || 'فشل حفظ إعدادات واتساب')
+    } finally {
+      setSavingWhatsapp(false)
     }
   }
 
@@ -194,6 +268,98 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
               </button>
             </div>
           </div>
+
+          <hr className="border-slate-100" />
+
+          {/* WhatsApp / Evolution settings */}
+          <form onSubmit={handleSaveWhatsapp} className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">WhatsApp / Evolution</p>
+              <span
+                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                  whatsappForm.connectionStatus === 'CONNECTED'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-slate-100 text-ink-500'
+                }`}
+              >
+                {whatsappForm.connectionStatus === 'CONNECTED' ? 'متصل' : 'غير متصل'}
+              </span>
+            </div>
+
+            {loadingWhatsapp ? (
+              <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-ink-500">جاري تحميل إعدادات واتساب...</div>
+            ) : (
+              <>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-ink-700">Evolution API URL</label>
+                  <input
+                    className="input-base w-full ltr-nums"
+                    type="url"
+                    dir="ltr"
+                    placeholder="https://evolution.example.com"
+                    value={whatsappForm.apiUrl}
+                    onChange={(e) => setWhatsappForm((f) => ({ ...f, apiUrl: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-ink-700">API Key</label>
+                  <input
+                    className="input-base w-full ltr-nums"
+                    type="password"
+                    dir="ltr"
+                    placeholder={whatsappForm.hasApiKey ? 'محفوظة - اتركها فارغة لعدم التغيير' : 'Evolution API key'}
+                    value={whatsappForm.apiKey}
+                    onChange={(e) => setWhatsappForm((f) => ({ ...f, apiKey: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-ink-700">Instance Name</label>
+                  <input
+                    className="input-base w-full ltr-nums"
+                    dir="ltr"
+                    placeholder="shop_ahmed"
+                    value={whatsappForm.instanceName}
+                    onChange={(e) => setWhatsappForm((f) => ({ ...f, instanceName: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-ink-700">رقم واتساب المتجر</label>
+                  <input
+                    className="input-base w-full ltr-nums"
+                    type="tel"
+                    inputMode="numeric"
+                    dir="ltr"
+                    placeholder="8 أرقام فقط"
+                    value={whatsappForm.senderPhone}
+                    onChange={(e) => setWhatsappForm((f) => ({ ...f, senderPhone: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-ink-700">حالة الاتصال</label>
+                  <select
+                    className="input-base w-full"
+                    value={whatsappForm.connectionStatus}
+                    onChange={(e) => setWhatsappForm((f) => ({ ...f, connectionStatus: e.target.value }))}
+                  >
+                    <option value="DISCONNECTED">غير متصل</option>
+                    <option value="CONNECTED">متصل</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingWhatsapp}
+                  className="w-full rounded-xl bg-primary-600 py-2.5 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {savingWhatsapp ? t.saving : 'حفظ إعدادات واتساب'}
+                </button>
+              </>
+            )}
+          </form>
 
           <hr className="border-slate-100" />
 

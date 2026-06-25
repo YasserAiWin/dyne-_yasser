@@ -21,7 +21,7 @@ router.use('/admin', adminDashboardRouter);
 // - Shop Dashboard: GET /api/shop/dashboard
 // - Customers: GET/POST /api/shop/customers, GET/PUT/DELETE /api/shop/customers/:id
 // - Transactions: GET /api/shop/customers/:customerId/transactions, POST /api/shop/customers/:customerId/debts, POST /api/shop/customers/:customerId/payments
-// - WhatsApp settings: GET/PUT /api/shop/whatsapp/settings
+// - WhatsApp status: GET /api/shop/whatsapp/settings
 router.use('/shop', shopDashboardRouter);
 router.use('/shop/customers', customersRouter);
 router.use('/shop/customers', transactionsRouter);

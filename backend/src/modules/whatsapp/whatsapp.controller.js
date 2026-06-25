@@ -16,12 +16,25 @@ class WhatsappController {
   };
 
   /**
-   * Update whatsapp configuration settings
+   * Get WhatsApp configuration settings for a shop as super admin.
    */
-  updateSettings = async (req, res, next) => {
+  getAdminSettings = async (req, res, next) => {
     try {
-      const shopId = req.user.shopId;
-      const settings = await whatsappService.updateSettings(shopId, req.body);
+      const shopId = req.params.id;
+      const settings = await whatsappService.getAdminSettings(shopId);
+      return successResponse(res, 'WhatsApp settings retrieved', { settings });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Super admin updates the shop's Evolution configuration.
+   */
+  updateAdminSettings = async (req, res, next) => {
+    try {
+      const shopId = req.params.id;
+      const settings = await whatsappService.updateAdminSettings(shopId, req.body);
       return successResponse(res, 'WhatsApp settings updated successfully', { settings });
     } catch (error) {
       next(error);

@@ -1,5 +1,6 @@
 const prisma = require('../../prisma/client');
 const { calculateCustomerBalance } = require('../../utils/balances');
+const { normalizePhone, isValidMauritanianPhone } = require('../../utils/phones');
 
 class CustomersService {
   /**
@@ -73,12 +74,19 @@ class CustomersService {
    */
   async createCustomer(shopId, customerData) {
     const { name, phone } = customerData;
+    const normalizedPhone = phone ? normalizePhone(phone) : null;
+
+    if (normalizedPhone && !isValidMauritanianPhone(normalizedPhone)) {
+      const error = new Error('Customer phone must be a valid Mauritanian 8-digit number');
+      error.statusCode = 400;
+      throw error;
+    }
     
     return prisma.customer.create({
       data: {
         shopId,
         name,
-        phone,
+        phone: normalizedPhone,
       },
     });
   }
@@ -102,13 +110,21 @@ class CustomersService {
       throw error;
     }
 
+    const normalizedPhone = updateData.phone ? normalizePhone(updateData.phone) : updateData.phone;
+
+    if (normalizedPhone && !isValidMauritanianPhone(normalizedPhone)) {
+      const error = new Error('Customer phone must be a valid Mauritanian 8-digit number');
+      error.statusCode = 400;
+      throw error;
+    }
+
     return prisma.customer.update({
       where: {
         id: customerId,
       },
       data: {
         name: updateData.name,
-        phone: updateData.phone,
+        phone: normalizedPhone,
       },
     });
   }

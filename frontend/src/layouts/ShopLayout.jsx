@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation, matchPath } from 'react-router-dom'
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
+import PwaInstallButton from '../components/PwaInstallButton'
 import ShopTabs from '../components/shop/ShopTabs'
 import { logout, getCurrentUser } from '../services/authService'
 import { IconDashboard, IconUsers } from '../components/icons'
@@ -57,6 +58,7 @@ export default function ShopLayout() {
           title={title}
           subtitle={subtitle}
           userName={user?.name || 'صاحب المتجر'}
+          extra={<PwaInstallButton />}
         />
 
         {/* Mobile top tab bar (replaces the drawer navigation). */}

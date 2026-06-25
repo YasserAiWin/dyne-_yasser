@@ -49,7 +49,24 @@ const isValidMauritanianPhone = (phone) => {
   return /^\+222\d{8}$/.test(phone);
 };
 
+/**
+ * Converts a normalized Mauritanian phone number into the format Evolution
+ * expects for WhatsApp recipients: 222 + 8 digits, without the plus sign.
+ *
+ * @param {string} phone - Raw or normalized phone number
+ * @returns {string} WhatsApp recipient number
+ */
+const toMauritanianWhatsappNumber = (phone) => {
+  const normalized = normalizePhone(phone);
+  if (!isValidMauritanianPhone(normalized)) {
+    return '';
+  }
+
+  return normalized.replace(/^\+/, '');
+};
+
 module.exports = {
   normalizePhone,
   isValidMauritanianPhone,
+  toMauritanianWhatsappNumber,
 };

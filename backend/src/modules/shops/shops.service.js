@@ -2,6 +2,16 @@ const bcrypt = require('bcryptjs');
 const prisma = require('../../prisma/client');
 const { getShopStatus, calculateNewExpiryDate } = require('../../utils/dates');
 
+const sanitizeWhatsappSetting = (setting) => {
+  if (!setting) return setting;
+  const { apiKey, instanceToken, ...safeSetting } = setting;
+  return {
+    ...safeSetting,
+    hasApiKey: Boolean(apiKey),
+    hasInstanceToken: Boolean(instanceToken),
+  };
+};
+
 class ShopsService {
   /**
    * Get all shops with their dynamically calculated statuses
@@ -57,6 +67,7 @@ class ShopsService {
 
     return {
       ...shop,
+      whatsappSetting: sanitizeWhatsappSetting(shop.whatsappSetting),
       status: getShopStatus(shop.expiryDate, shop.isSuspended),
     };
   }

@@ -72,3 +72,26 @@ export async function extendSubscription(id, payload) {
   const { data } = await api.post(`/admin/shops/${id}/extend-subscription`, payload)
   return unwrapApiResponse(data)
 }
+
+export async function getShopWhatsappSettings(id) {
+  if (USE_MOCK) {
+    return mockDelay({
+      settings: {
+        provider: 'EVOLUTION',
+        apiUrl: '',
+        instanceName: '',
+        senderPhone: '',
+        connectionStatus: 'DISCONNECTED',
+        hasApiKey: false,
+      },
+    })
+  }
+  const { data } = await api.get(`/admin/shops/${id}/whatsapp/settings`)
+  return unwrapApiResponse(data)
+}
+
+export async function updateShopWhatsappSettings(id, payload) {
+  if (USE_MOCK) return mockDelay({ settings: { id, ...payload, hasApiKey: Boolean(payload.apiKey) } })
+  const { data } = await api.put(`/admin/shops/${id}/whatsapp/settings`, payload)
+  return unwrapApiResponse(data)
+}
