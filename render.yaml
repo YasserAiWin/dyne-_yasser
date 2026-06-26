@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: dyne-yasser-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: /index.html
