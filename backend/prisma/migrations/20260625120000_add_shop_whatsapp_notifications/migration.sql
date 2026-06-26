@@ -1,12 +1,12 @@
 -- Add per-shop Evolution API configuration managed by the super admin.
 ALTER TABLE "ShopWhatsappSetting"
-ADD COLUMN "apiUrl" TEXT,
-ADD COLUMN "apiKey" TEXT,
-ADD COLUMN "instanceName" TEXT,
-ADD COLUMN "senderPhone" TEXT;
+ADD COLUMN IF NOT EXISTS "apiUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "apiKey" TEXT,
+ADD COLUMN IF NOT EXISTS "instanceName" TEXT,
+ADD COLUMN IF NOT EXISTS "senderPhone" TEXT;
 
 -- Track outgoing WhatsApp attempts without blocking the debt/payment workflow.
-CREATE TABLE "WhatsappMessageLog" (
+CREATE TABLE IF NOT EXISTS "WhatsappMessageLog" (
   "id" UUID NOT NULL,
   "shopId" UUID NOT NULL,
   "customerId" UUID,
@@ -20,6 +20,6 @@ CREATE TABLE "WhatsappMessageLog" (
   CONSTRAINT "WhatsappMessageLog_pkey" PRIMARY KEY ("id")
 );
 
-CREATE INDEX "WhatsappMessageLog_shopId_idx" ON "WhatsappMessageLog"("shopId");
-CREATE INDEX "WhatsappMessageLog_customerId_idx" ON "WhatsappMessageLog"("customerId");
-CREATE INDEX "WhatsappMessageLog_transactionId_idx" ON "WhatsappMessageLog"("transactionId");
+CREATE INDEX IF NOT EXISTS "WhatsappMessageLog_shopId_idx" ON "WhatsappMessageLog"("shopId");
+CREATE INDEX IF NOT EXISTS "WhatsappMessageLog_customerId_idx" ON "WhatsappMessageLog"("customerId");
+CREATE INDEX IF NOT EXISTS "WhatsappMessageLog_transactionId_idx" ON "WhatsappMessageLog"("transactionId");
