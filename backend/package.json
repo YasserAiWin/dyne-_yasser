@@ -4,9 +4,10 @@
   "description": "Backend for Shop Debt Management System",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "prisma migrate deploy && node src/server.js",
     "dev": "nodemon src/server.js",
     "prisma:generate": "prisma generate",
+    "prisma:deploy": "prisma migrate deploy",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seed.js"
   },
