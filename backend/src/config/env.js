@@ -9,7 +9,13 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(8),
   JWT_EXPIRES_IN: z.string().default('7d'),
-  FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  FRONTEND_URL: z
+    .string()
+    .refine(
+      (value) => value.split(',').every((origin) => z.string().url().safeParse(origin.trim()).success),
+      'FRONTEND_URL must be a URL or comma-separated list of URLs'
+    )
+    .default('http://localhost:5173'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });
 

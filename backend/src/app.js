@@ -12,7 +12,10 @@ const app = express();
 app.use(helmet());
 
 // Enable CORS with dynamic origin matching
-const allowedOrigins = [env.FRONTEND_URL];
+const allowedOrigins = Array.from(new Set([
+  ...env.FRONTEND_URL.split(',').map((origin) => origin.trim()),
+  'https://dyne-yasser-web.onrender.com',
+].filter(Boolean)));
 if (env.NODE_ENV === 'development' && !allowedOrigins.includes('http://localhost:5173')) {
   allowedOrigins.push('http://localhost:5173');
 }
