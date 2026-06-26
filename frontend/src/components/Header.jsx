@@ -1,6 +1,6 @@
 import { IconMenu, IconBell } from './icons'
 
-export default function Header({ title, subtitle, onMenu, userName = 'مستخدم', extra }) {
+export default function Header({ title, subtitle, onMenu, userName = 'مستخدم', extra, showNotifications = true }) {
   const initials = userName.trim().charAt(0) || 'م'
 
   return (
@@ -25,10 +25,12 @@ export default function Header({ title, subtitle, onMenu, userName = 'مستخد
 
       <div className="flex items-center gap-2 md:gap-3">
         {extra}
-        <button className="relative rounded-xl p-2 text-ink-500 hover:bg-slate-100" aria-label="الإشعارات">
-          <IconBell className="h-5 w-5" />
-          <span className="absolute left-2 top-2 h-2 w-2 rounded-full bg-red-500" />
-        </button>
+        {showNotifications && (
+          <button className="relative rounded-xl p-2 text-ink-500 hover:bg-slate-100" aria-label="الإشعارات">
+            <IconBell className="h-5 w-5" />
+            <span className="absolute left-2 top-2 h-2 w-2 rounded-full bg-red-500" />
+          </button>
+        )}
         <div className="flex items-center gap-2.5">
           <div className="hidden text-left sm:block">
             <p className="text-sm font-medium text-ink-900">{userName}</p>

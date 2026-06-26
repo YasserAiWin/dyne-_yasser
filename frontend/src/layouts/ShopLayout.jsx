@@ -59,6 +59,7 @@ export default function ShopLayout() {
           subtitle={subtitle}
           userName={user?.name || 'صاحب المتجر'}
           extra={<PwaInstallButton />}
+          showNotifications={false}
         />
 
         {/* Mobile top tab bar (replaces the drawer navigation). */}
