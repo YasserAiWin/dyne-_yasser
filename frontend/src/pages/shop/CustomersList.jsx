@@ -84,7 +84,7 @@ export default function CustomersList() {
   return (
     <div className="space-y-5">
       {/* Search + add */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <Input
             name="search"
@@ -94,7 +94,7 @@ export default function CustomersList() {
             icon={<IconSearch className="h-5 w-5" />}
           />
         </div>
-        <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => { setShowAdd(true); setAddError('') }}>
+        <Button className="w-full sm:w-auto" icon={<IconPlus className="h-4 w-4" />} onClick={() => { setShowAdd(true); setAddError('') }}>
           إضافة عميل
         </Button>
       </div>
@@ -118,7 +118,7 @@ export default function CustomersList() {
                 </span>
 
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-start min-[420px]:justify-between">
                     <div className="min-w-0">
                       <p className="truncate font-bold text-ink-900">{c.name}</p>
                       <p className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500">
@@ -126,7 +126,7 @@ export default function CustomersList() {
                         <span className="ltr-nums truncate">{c.phone}</span>
                       </p>
                     </div>
-                    <div className="flex shrink-0 items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-1 self-start">
                       <button
                         onClick={() => setEditCustomer(c)}
                         className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-500 hover:bg-slate-50 hover:text-ink-800"
@@ -142,7 +142,7 @@ export default function CustomersList() {
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="mt-3 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-between">
                     <div>
                       <p className="text-xs text-ink-400">الرصيد الحالي</p>
                       <p className={`ltr-nums text-lg font-bold ${balanceColor}`}>
@@ -150,7 +150,7 @@ export default function CustomersList() {
                       </p>
                     </div>
                     {/* Primary action */}
-                    <Button onClick={() => setSheetCustomer(c)}>تسجيل دين</Button>
+                    <Button className="w-full min-[420px]:w-auto" onClick={() => setSheetCustomer(c)}>تسجيل دين</Button>
                   </div>
                 </div>
               </div>
@@ -196,15 +196,16 @@ export default function CustomersList() {
 
       {/* Add customer modal */}
       {showAdd && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowAdd(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-soft" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-ink-900">إضافة عميل جديد</h3>
-              <button onClick={() => setShowAdd(false)} className="text-ink-400 hover:text-ink-700">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-4" onClick={() => setShowAdd(false)}>
+          <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-4 shadow-soft sm:max-h-[calc(100dvh-2rem)] sm:p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="min-w-0 text-lg font-bold text-ink-900">إضافة عميل جديد</h3>
+              <button onClick={() => setShowAdd(false)} className="shrink-0 rounded-lg p-1 text-ink-400 hover:bg-slate-50 hover:text-ink-700">
                 <IconClose className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={handleAdd} className="space-y-4">
+            <form onSubmit={handleAdd} className="space-y-4 pb-[env(safe-area-inset-bottom)]">
               <Input label="اسم العميل" value={newCustomer.name}
                 onChange={(e) => setNewCustomer((c) => ({ ...c, name: e.target.value }))}
                 placeholder="الاسم الكامل" icon={<IconUser className="h-5 w-5" />} required />
@@ -214,8 +215,8 @@ export default function CustomersList() {
               {addError && (
                 <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm text-red-600">{addError}</div>
               )}
-              <div className="flex gap-3 pt-2">
-                <Button type="submit" className="flex-1">إضافة العميل</Button>
+              <div className="grid grid-cols-1 gap-3 pt-2 min-[360px]:grid-cols-2">
+                <Button type="submit">إضافة العميل</Button>
                 <Button type="button" variant="secondary" onClick={() => setShowAdd(false)}>إلغاء</Button>
               </div>
             </form>

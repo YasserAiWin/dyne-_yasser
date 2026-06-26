@@ -48,16 +48,16 @@ export default function CustomerEditSheet({ open, customer, onClose, onUpdated, 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={saving || deleting ? undefined : onClose} aria-hidden />
 
-      <div className="relative w-full max-w-md rounded-t-3xl bg-white p-5 shadow-soft sm:rounded-3xl">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-4 shadow-soft sm:max-h-[calc(100dvh-2rem)] sm:p-5">
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
 
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-ink-900">تعديل العميل</h3>
-          <button onClick={onClose} disabled={saving || deleting} className="text-ink-400 hover:text-ink-700 disabled:opacity-50">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h3 className="min-w-0 text-lg font-bold text-ink-900">تعديل العميل</h3>
+          <button onClick={onClose} disabled={saving || deleting} className="shrink-0 rounded-lg p-1 text-ink-400 hover:bg-slate-50 hover:text-ink-700 disabled:opacity-50">
             <IconClose className="h-5 w-5" />
           </button>
         </div>
@@ -127,17 +127,17 @@ export default function CustomerEditSheet({ open, customer, onClose, onUpdated, 
                 <IconWarning className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
                 <p className="text-sm text-red-700">سيُحذف العميل وجميع معاملاته. لا يمكن التراجع.</p>
               </div>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition"
+                  className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
                 >
                   {deleting ? 'جارٍ الحذف...' : 'نعم، احذف'}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="flex-1 rounded-lg border border-slate-200 bg-white py-2 text-sm font-medium text-ink-700 hover:bg-slate-50 transition"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-slate-50"
                 >
                   إلغاء
                 </button>

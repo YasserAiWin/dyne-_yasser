@@ -47,16 +47,17 @@ export default function CreateShopModal({ onClose, onCreated }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h2 className="font-bold text-ink-900">{t.createShop}</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-ink-400 hover:bg-slate-100 hover:text-ink-700">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-4" onClick={onClose}>
+      <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-sm overflow-y-auto overscroll-contain rounded-3xl bg-white shadow-xl sm:max-h-[calc(100dvh-2rem)]" onClick={(e) => e.stopPropagation()}>
+        <div className="mx-auto mt-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
+          <h2 className="min-w-0 font-bold text-ink-900">{t.createShop}</h2>
+          <button onClick={onClose} className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-slate-100 hover:text-ink-700">
             <IconClose className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:px-5">
           {error && (
             <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div>
           )}
@@ -128,13 +129,13 @@ export default function CreateShopModal({ onClose, onCreated }) {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-1">
+          <div className="grid grid-cols-1 gap-3 pt-1 min-[360px]:grid-cols-2">
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-xl bg-primary-600 py-2.5 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-50">
+              className="rounded-xl bg-primary-600 px-3 py-2.5 text-sm font-medium text-white transition hover:bg-primary-700 disabled:opacity-50">
               {saving ? t.creating : t.createBtn}
             </button>
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
+              className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium text-ink-700 hover:bg-slate-50">
               {t.cancelBtn}
             </button>
           </div>

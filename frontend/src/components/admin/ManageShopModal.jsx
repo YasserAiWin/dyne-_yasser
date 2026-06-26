@@ -182,23 +182,24 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-3 sm:items-center sm:p-4" onClick={onClose}>
       <div
-        className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl"
+        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-xl sm:max-h-[calc(100dvh-2rem)]"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="mx-auto mt-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2 className="font-bold text-ink-900">{shop.shopName}</h2>
-            <p className="text-xs text-ink-400">{shop.phone}</p>
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-4 sm:px-5">
+          <div className="min-w-0">
+            <h2 className="truncate font-bold text-ink-900">{shop.shopName}</h2>
+            <p className="truncate text-xs text-ink-400">{shop.phone}</p>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-ink-400 hover:bg-slate-100 hover:text-ink-700">
+          <button onClick={onClose} className="shrink-0 rounded-lg p-1.5 text-ink-400 hover:bg-slate-100 hover:text-ink-700">
             <IconClose className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="max-h-[75vh] overflow-y-auto px-5 py-4 space-y-5">
+        <div className="max-h-[calc(100dvh-6.5rem)] space-y-5 overflow-y-auto overscroll-contain px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-h-[75vh] sm:px-5">
           {error && (
             <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm text-red-600">{error}</div>
           )}
@@ -240,7 +241,7 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
               </span>
             </div>
             {/* Quick extend buttons */}
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5 min-[380px]:grid-cols-4">
               {EXTEND_MONTHS.map((m, idx) => (
                 <button key={m} onClick={() => handleExtend({ value: { addMonths: m } }, idx)}
                   disabled={extending !== null || settingDate}
@@ -251,12 +252,12 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
             </div>
 
             {/* Exact date picker */}
-            <div className="flex gap-2 pt-1">
+            <div className="grid grid-cols-1 gap-2 pt-1 min-[380px]:grid-cols-[1fr_auto]">
               <input
                 type="date"
                 value={customDate}
                 onChange={(e) => setCustomDate(e.target.value)}
-                className="input-base flex-1 text-sm ltr-nums"
+                className="input-base text-sm ltr-nums"
                 style={{ direction: 'ltr' }}
               />
               <button
@@ -392,13 +393,13 @@ export default function ManageShopModal({ shop, onClose, onUpdated }) {
                   <IconWarning className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
                   <p className="text-sm text-red-700">{t.deleteWarning}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                   <button onClick={handleDelete} disabled={deleting}
-                    className="flex-1 rounded-lg bg-red-600 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 transition">
+                    className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50">
                     {deleting ? t.deleting : t.confirmDelete}
                   </button>
                   <button onClick={() => setConfirmDelete(false)}
-                    className="flex-1 rounded-lg bg-white py-2 text-sm font-medium text-ink-700 border border-slate-200 hover:bg-slate-50 transition">
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-ink-700 transition hover:bg-slate-50">
                     {t.cancel}
                   </button>
                 </div>

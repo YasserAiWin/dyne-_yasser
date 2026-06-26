@@ -64,18 +64,18 @@ export default function ShopsList() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+        <div className="flex flex-col gap-2 min-[420px]:flex-row min-[420px]:items-center">
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
             {FILTERS.map((f) => (
               <button key={f.id} onClick={() => setFilter(f.id)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                className={`rounded-lg px-2 py-1.5 text-sm font-medium transition ${
                   filter === f.id ? 'bg-white text-primary-700 shadow-sm' : 'text-ink-500 hover:text-ink-700'
                 }`}>
                 {f.label}
               </button>
             ))}
           </div>
-          <Button icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowCreate(true)}>
+          <Button className="w-full min-[420px]:w-auto" icon={<IconPlus className="h-4 w-4" />} onClick={() => setShowCreate(true)}>
             {t.addShop}
           </Button>
         </div>
@@ -93,7 +93,7 @@ export default function ShopsList() {
               const days = Math.round((end - today) / 86400000)
               const daysColor = days < 0 ? 'text-red-600' : days <= 7 ? 'text-orange-600' : 'text-ink-500'
               return (
-                <div key={shop.id} className="flex items-center gap-4 px-4 py-3.5">
+                <div key={shop.id} className="flex items-start gap-3 px-3 py-3.5 sm:items-center sm:gap-4 sm:px-4">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-sm font-bold text-primary-700">
                     {(shop.shopName || '?').charAt(0)}
                   </span>
@@ -103,6 +103,13 @@ export default function ShopsList() {
                       {shop.ownerName}
                       {shop.phone && <span className="ltr-nums mx-2 text-ink-400">· {shop.phone}</span>}
                     </p>
+                    <div className="mt-2 flex items-center gap-2 sm:hidden">
+                      <StatusBadge status={shop.status} />
+                      <span className={`ltr-nums text-xs font-semibold ${daysColor}`}>
+                        {days < 0 ? `-${Math.abs(days)}` : days}
+                        <span className="mr-1 font-medium">{lang === 'en' ? 'd' : 'ي'}</span>
+                      </span>
+                    </div>
                   </div>
                   <div className="hidden text-end sm:block min-w-[90px]">
                     <p className={`ltr-nums text-base font-bold tabular-nums ${daysColor}`}>
@@ -116,7 +123,7 @@ export default function ShopsList() {
                   <div className="hidden sm:block">
                     <StatusBadge status={shop.status} />
                   </div>
-                  <Button variant="secondary" size="sm" onClick={() => setManaging(shop)}>
+                  <Button className="shrink-0" variant="secondary" size="sm" onClick={() => setManaging(shop)}>
                     {t.edit}
                   </Button>
                 </div>

@@ -56,11 +56,11 @@ export default function DataTable({ columns, data, keyField = 'id', emptyText = 
       {/* Mobile stacked cards */}
       <div className="space-y-3 md:hidden">
         {data.map((row) => (
-          <div key={row[keyField]} className="rounded-xl border border-slate-100 p-4">
+          <div key={row[keyField]} className="rounded-xl border border-slate-100 p-3 sm:p-4">
             {columns.map((col) => (
-              <div key={col.key} className="flex items-center justify-between py-1.5">
-                <span className="text-xs text-ink-400">{col.header}</span>
-                <span className="text-sm font-medium text-ink-700">
+              <div key={col.key} className="flex items-start justify-between gap-3 py-1.5">
+                <span className="shrink-0 text-xs text-ink-400">{col.header}</span>
+                <span className="min-w-0 text-left text-sm font-medium text-ink-700">
                   {col.render ? col.render(row) : row[col.key]}
                 </span>
               </div>

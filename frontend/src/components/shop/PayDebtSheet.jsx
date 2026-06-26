@@ -54,30 +54,30 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-black/40" onClick={saving ? undefined : onClose} aria-hidden />
 
-      <div className="relative w-full max-w-md rounded-t-3xl bg-white p-5 shadow-soft sm:rounded-3xl">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-3xl bg-white p-4 shadow-soft sm:max-h-[calc(100dvh-2rem)] sm:p-5">
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-slate-200 sm:hidden" />
 
         {/* Header */}
-        <div className="mb-4 flex items-center justify-between">
-          <div>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
             <h3 className="text-lg font-bold text-ink-900">{isPayment ? 'تسديد دين' : 'تسجيل دين'}</h3>
-            <p className="text-sm text-ink-400">{customer.name}</p>
+            <p className="truncate text-sm text-ink-400">{customer.name}</p>
           </div>
           <button type="button" onClick={onClose} disabled={saving}
-            className="text-ink-400 hover:text-ink-700 disabled:opacity-50">
+            className="shrink-0 rounded-lg p-1 text-ink-400 hover:bg-slate-50 hover:text-ink-700 disabled:opacity-50">
             <IconClose className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleConfirm} className="space-y-4">
+        <form onSubmit={handleConfirm} className="space-y-4 pb-[env(safe-area-inset-bottom)]">
 
           {/* Live balance preview — the main feature */}
           <div className="grid grid-cols-2 divide-x divide-x-reverse divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
             {/* Current */}
-            <div className="p-4 text-center">
+            <div className="min-w-0 p-3 text-center sm:p-4">
               <p className="mb-1 text-xs text-ink-400">الرصيد الحالي</p>
               <p className={`ltr-nums text-lg font-bold ${balanceColor(currentBalance)}`}>
                 {formatCurrency(Math.abs(currentBalance))}
@@ -88,7 +88,7 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
             </div>
 
             {/* Arrow + new balance */}
-            <div className="relative p-4 text-center">
+            <div className="relative min-w-0 p-3 text-center sm:p-4">
               {/* Arrow in the divider */}
               <span className="absolute inset-y-0 -start-3 flex items-center">
                 <span className={`flex h-6 w-6 items-center justify-center rounded-full ${
@@ -117,8 +117,8 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
           </div>
 
           {/* Payment toggle */}
-          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3">
-            <span className="text-sm font-medium text-ink-700">هذه دفعة وليست دينًا جديدًا</span>
+          <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-3 sm:px-4">
+            <span className="min-w-0 text-sm font-medium leading-6 text-ink-700">هذه دفعة وليست دينًا جديدًا</span>
             <input
               type="checkbox"
               checked={isPayment}
