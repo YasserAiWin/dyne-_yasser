@@ -1,6 +1,6 @@
 {
-  "name": "دفتر المحل",
-  "short_name": "دفتر المحل",
+  "name": "الدين",
+  "short_name": "الدين",
   "description": "إدارة ديون العملاء للمتاجر",
   "start_url": "/shop/customers",
   "scope": "/",

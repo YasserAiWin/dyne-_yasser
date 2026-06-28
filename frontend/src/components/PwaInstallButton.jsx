@@ -69,14 +69,13 @@ export default function PwaInstallButton() {
 
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end bg-black/40"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           onClick={() => setShowModal(false)}
         >
           <div
-            className="relative w-full rounded-t-2xl bg-white px-5 pb-8 pt-5 shadow-xl"
+            className="relative w-full max-w-sm rounded-2xl bg-white px-5 pb-8 pt-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
 
             <button
               type="button"
