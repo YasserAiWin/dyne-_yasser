@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Button from '../Button'
 import { IconClose, IconCheck, IconArrowDown, IconArrowUp } from '../icons'
 import { formatCurrency } from '../../utils/format'
@@ -10,6 +10,7 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
   const [description, setDescription] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const amountRef = useRef(null)
 
   useEffect(() => {
     if (open) {
@@ -47,6 +48,7 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
     if (currentNum <= 0) return
     setItems((prev) => [...prev, currentNum])
     setCurrentInput('')
+    amountRef.current?.focus()
   }
 
   function removeItem(index) {
@@ -148,6 +150,7 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
                   step="any"
                   inputMode="decimal"
                   placeholder="0"
+                  ref={amountRef}
                   value={currentInput}
                   onChange={(e) => setCurrentInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addItem() } }}
