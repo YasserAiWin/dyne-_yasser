@@ -208,7 +208,7 @@ export default function CustomersList() {
             <form onSubmit={handleAdd} className="space-y-4 pb-[env(safe-area-inset-bottom)]">
               <Input label="اسم العميل" value={newCustomer.name}
                 onChange={(e) => setNewCustomer((c) => ({ ...c, name: e.target.value }))}
-                placeholder="الاسم الكامل" icon={<IconUser className="h-5 w-5" />} required />
+                placeholder="الاسم الكامل" icon={<IconUser className="h-5 w-5" />} required autoFocus />
               <Input label="رقم الهاتف" value={newCustomer.phone}
                 onChange={(e) => setNewCustomer((c) => ({ ...c, phone: e.target.value }))}
                 placeholder="XX XX XX XX" icon={<IconPhone className="h-5 w-5" />} />
