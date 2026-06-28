@@ -78,10 +78,14 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="absolute inset-0 bg-black/40" onClick={saving ? undefined : onClose} aria-hidden />
-
-      <div className="relative w-full max-w-sm overflow-y-auto overscroll-contain rounded-2xl bg-white p-4 shadow-soft" style={{ maxHeight: 'calc(100dvh - 2rem)' }}>
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/40"
+      role="dialog"
+      aria-modal="true"
+      onClick={saving ? undefined : onClose}
+    >
+      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 shadow-soft" onClick={(e) => e.stopPropagation()}>
 
         {/* Header */}
         <div className="mb-3 flex items-center justify-between gap-3">
@@ -219,6 +223,7 @@ export default function PayDebtSheet({ open, customer, onClose, onSubmit }) {
             {saving ? 'جارٍ الحفظ...' : isPayment ? 'تأكيد الدفع' : 'تسجيل الدين'}
           </Button>
         </form>
+      </div>
       </div>
     </div>
   )
